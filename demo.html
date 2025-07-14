@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Demo de Cubo Pago SDK</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet" />
+    <style>
+      :root {
+        --primary-color: #00a69c;
+        --secondary-color: #4b3072;
+        --tertiary-color: #f2cf34;
+        --light-gray: #f8f9fa;
+        --dark-gray: #343a40;
+        --white: #ffffff;
+      }
+
+      body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--light-gray);
+        color: var(--dark-gray);
+        margin: 0;
+        padding: 2rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+
+      .container {
+        background: var(--white);
+        padding: 2.5rem;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        max-width: 450px;
+        width: 100%;
+        text-align: center;
+        border-top: 5px solid var(--primary-color);
+      }
+
+      h1 {
+        color: #3e4856;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+      }
+
+      h2 {
+        color: var(--secondary-color);
+        margin-top: 2rem;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        font-size: 1.25rem;
+      }
+
+      .subtitle {
+        color: #3e4856;
+        margin-bottom: 2rem;
+      }
+
+      button {
+        background-color: var(--primary-color);
+        color: var(--white);
+        border: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 1rem;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(0, 166, 156, 0.2);
+      }
+
+      button:hover {
+        background-color: #008c84;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 166, 156, 0.3);
+      }
+
+      button#connectButton {
+        background-color: var(--secondary-color);
+        box-shadow: 0 4px 15px rgba(76, 49, 117, 0.2);
+      }
+
+      button#connectButton:hover {
+        background-color: #3d275c;
+        box-shadow: 0 6px 20px rgba(76, 49, 117, 0.3);
+      }
+
+      hr {
+        border: 0;
+        height: 1px;
+        background: #e9ecef;
+        margin: 2.5rem 0;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+        text-align: left;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--secondary-color);
+      }
+
+      input[type='number'],
+      select {
+        width: 100%;
+        padding: 0.8rem;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        font-size: 1rem;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      input[type='number']:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(0, 166, 156, 0.15);
+      }
+
+      #loadingIndicator {
+        display: none;
+        color: var(--primary-color);
+        font-weight: 600;
+        margin: 1.5rem 0;
+      }
+
+      #status {
+        margin-top: 2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        padding: 0.8rem 1.2rem;
+        border-radius: 8px;
+        background-color: var(--light-gray);
+        border: 1px solid #e9ecef;
+      }
+
+      #result {
+        margin-top: 1rem;
+        background-color: var(--dark-gray);
+        color: var(--white);
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: left;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        font-family: 'Menlo', 'Courier New', Courier, monospace;
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid var(--dark-gray);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <img
+        src="https://www.cubopago.com/images/cubo-logo.svg"
+        alt="Cubo Pago"
+        class="logo" />
+      <h1>Cubo Pago SDK</h1>
+      <p class="subtitle">
+        Conecta tu lector de tarjetas y realiza un pago de prueba.
+      </p>
+
+      <button id="connectButton">Conectar Lector</button>
+
+      <hr />
+
+      <h2>Realizar un Pago</h2>
+      <div class="form-group">
+        <label for="amountInput">Monto:</label>
+        <input
+          type="number"
+          id="amountInput"
+          placeholder="Ej: 12.50"
+          step="0.01" />
+      </div>
+      <div class="form-group">
+        <label for="currencySelect">Moneda:</label>
+        <select id="currencySelect">
+          <option value="0484">MXN (Peso mexicano)</option>
+          <option value="0840" selected>USD (Dólar estadounidense)</option>
+          <option value="0978">EUR (Euro)</option>
+        </select>
+      </div>
+      <button id="payButton">Pagar ahora</button>
+
+      <div id="loadingIndicator" style="display: none">
+        Procesando pago, por favor espera...
+      </div>
+
+      <div id="status">Estado: Desconectado</div>
+
+      <pre id="result"></pre>
+    </div>
+
+    <script src="./src/cubo-pos-sdk-web.js"></script>
+    <script src="./src/app.js"></script>
+  </body>
+</html>
