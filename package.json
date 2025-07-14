@@ -1,0 +1,17 @@
+{
+  "name": "cubo-pos-sdk-web-demo",
+  "version": "1.0.0",
+  "description": "Demo project for the Cubo POS Web SDK",
+  "main": "src/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cubo",
+    "pos",
+    "sdk",
+    "web"
+  ],
+  "author": "",
+  "license": "ISC"
+}
