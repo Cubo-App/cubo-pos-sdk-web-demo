@@ -6,27 +6,41 @@ Este documento proporciona una guía completa para integrar y utilizar el Cubo P
 
 El **Cubo Pago SDK Web** permite a las aplicaciones web interactuar directamente con los lectores de tarjetas de Cubo Pago a través de una conexión Bluetooth. Con este SDK, puedes iniciar y gestionar transacciones de pago de forma sencilla y segura.
 
-## 2. Instalación
+## 2. Prerrequisitos Técnicos
+
+Antes de integrar el SDK, asegúrate de cumplir con los siguientes requisitos, ya que son indispensables para el funcionamiento de la **Web Bluetooth API**.
+
+- **Contexto Seguro (HTTPS):** La Web Bluetooth API solo funciona en páginas servidas a través de un contexto seguro. Esto significa que tu sitio debe usar `https` en producción. Para el desarrollo local, `http://localhost` es considerado un contexto seguro.
+
+- **Compatibilidad de Navegadores:** La Web Bluetooth API no es universalmente compatible. Funciona en:
+  - **Chrome** (Desktop y Android)
+  - **Edge** (Desktop)
+  - **Opera** (Desktop y Android)
+- No es compatible con Safari (macOS/iOS) ni con Firefox en ninguna plataforma.
+
+## 3. Instalación
 
 Para comenzar, incluye el script del SDK en tu archivo HTML. Asegúrate de que apunte a la ruta correcta donde has alojado el archivo `cubo-pos-sdk-web.js`.
 
 ```html
-<script src="dist/cubo-pos-sdk-web.js"></script>
+<script src="src/cubo-pos-sdk-web.js"></script>
 ```
 
-## 3. Inicialización del SDK
+## 4. Inicialización del SDK
 
-Para usar el SDK, primero debes crear una instancia de `CuboPagoSDK`, proporcionando tu `apiKey` única.
+Para usar el SDK, primero debes crear una instancia de `CuboPagoSDK`, proporcionando tu `apiKey`.
+
+> **Nota de Seguridad:** Tu `apiKey` es una credencial sensible. Debes obtenerla desde tu panel de control de Cubo Pago. En un entorno de producción, nunca expongas la `apiKey` directamente en el código del lado del cliente. La forma más segura es que tu backend la provea a la aplicación web después de que el usuario se haya autenticado.
 
 ```javascript
 const pos = new CuboPagoSDK({
-  apiKey: 'TU_API_KEY_AQUI',
+  apiKey: 'TU_API_KEY_AQUI', // ¡Reemplázala con tu clave real!
 });
 ```
 
-## 4. Funcionalidades Principales
+## 5. Funcionalidades Principales
 
-### 4.1. Conexión con el Lector
+### 5.1. Conexión con el Lector
 
 La conexión con el lector de tarjetas se gestiona con los métodos `connect()` y `disconnect()`.
 
@@ -42,7 +56,7 @@ connectBtn.addEventListener('click', () => {
 });
 ```
 
-### 4.2. Realizar un Pago
+### 5.2. Realizar un Pago
 
 Para iniciar una transacción, utiliza el método `startPayment()`. Este método recibe un objeto con los detalles de la transacción.
 
@@ -66,7 +80,7 @@ payBtn.addEventListener('click', () => {
 });
 ```
 
-### 4.3. Escuchar Eventos del SDK
+### 5.3. Escuchar Eventos del SDK
 
 El SDK emite eventos para mantener tu aplicación informada sobre el estado del proceso. Puedes escucharlos usando el método `on()`.
 
@@ -153,11 +167,11 @@ A continuación se detallan los eventos y los datos que emiten:
   });
   ```
 
-## 5. Ejemplo de Integración Completa
+## 6. Ejemplo de Integración Completa
 
-Aquí tienes un ejemplo básico que puedes usar como punto de partida para tu integración.
+Aquí tienes un ejemplo básico que puedes usar como punto de partida para tu integración. Las rutas de los scripts están corregidas para que coincidan con la estructura del proyecto.
 
-### HTML (`index.html`)
+### HTML (`demo.html`)
 
 ```html
 <!DOCTYPE html>
@@ -198,13 +212,14 @@ Aquí tienes un ejemplo básico que puedes usar como punto de partida para tu in
     <h3>Resultado de la Transacción</h3>
     <pre id="result"></pre>
 
-    <script src="dist/cubo-pos-sdk-web.js"></script>
-    <script src="app.js"></script>
+    <!-- Rutas corregidas para apuntar a la carpeta src -->
+    <script src="src/cubo-pos-sdk-web.js"></script>
+    <script src="src/app.js"></script>
   </body>
 </html>
 ```
 
-### JavaScript (`app.js`)
+### JavaScript (`src/app.js`)
 
 ```javascript
 document.addEventListener('DOMContentLoaded', () => {
@@ -289,13 +304,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 ```
 
-## 6. Ejemplo de Integración con React
+## 7. Ejemplo de Integración con React
 
 Si trabajas con React, puedes integrar el SDK siguiendo estos pasos. Este ejemplo asume que tienes un proyecto de React funcional (creado con Vite o Create React App).
 
 ### Paso 1: Incluir el SDK en `index.html`
 
-Primero, coloca el archivo `dist/cubo-pos-sdk-web.js` en la carpeta `public` de tu proyecto React.
+Primero, coloca el archivo `cubo-pos-sdk-web.js` en la carpeta `public` de tu proyecto React.
 
 Luego, añade la etiqueta `<script>` a tu archivo `public/index.html` para que el SDK esté disponible globalmente en tu aplicación.
 
@@ -311,7 +326,7 @@ Luego, añade la etiqueta `<script>` a tu archivo `public/index.html` para que e
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
 
-    <!-- Carga el SDK de Cubo Pago -->
+    <!-- Carga el SDK de Cubo Pago desde la carpeta public -->
     <script src="/cubo-pos-sdk-web.js"></script>
   </body>
 </html>
