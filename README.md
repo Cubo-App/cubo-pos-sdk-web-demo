@@ -90,6 +90,8 @@ A continuación se detallan los eventos y los datos que emiten:
 
   - **Datos emitidos**: `(data: { deviceName: string })` - Un objeto que contiene el nombre del dispositivo conectado.
 
+  ###
+
   ```javascript
   pos.on('connected', data => {
     console.log(`Conectado a: ${data.deviceName}`);
@@ -99,6 +101,8 @@ A continuación se detallan los eventos y los datos que emiten:
 - **`disconnected`**: Se dispara cuando el lector se desconecta, ya sea de forma intencionada o por pérdida de señal.
 
   - **Datos emitidos**: `void` - No se emiten datos con este evento.
+
+  ###
 
   ```javascript
   pos.on('disconnected', () => {
@@ -117,6 +121,7 @@ A continuación se detallan los eventos y los datos que emiten:
     - `'processing_payment'`: Procesando la información de la tarjeta.
     - `'payment_success'`: La transacción se completó con éxito.
     - `'payment_failed'`: La transacción falló.
+    ###
 
   ```javascript
   pos.on('status', newStatus => {
@@ -127,6 +132,8 @@ A continuación se detallan los eventos y los datos que emiten:
 - **`loading`**: Se activa para indicar que el SDK está realizando una operación asíncrona (como procesar un pago) y la UI debería bloquearse.
 
   - **Datos emitidos**: `(isLoading: boolean)` - `true` cuando comienza una operación, `false` cuando termina.
+
+  ###
 
   ```javascript
   pos.on('loading', isLoading => {
@@ -144,6 +151,7 @@ A continuación se detallan los eventos y los datos que emiten:
     - `success`: `true` si el pago fue exitoso, `false` si no lo fue.
     - `data`: Si `success` es `true`, contiene el objeto de respuesta de la API de Cubo Pago.
     - `error`: Si `success` es `false`, contiene el objeto de error.
+    ###
 
   ```javascript
   pos.on('transactionResult', result => {
@@ -160,6 +168,7 @@ A continuación se detallan los eventos y los datos que emiten:
   - **Datos emitidos**: `(error: { type: string, message: string })` - Un objeto que describe el error.
     - `type`: Una cadena que categoriza el error (ej: `'connection_failed'`, `'not_connected'`, `'sdk_error'`).
     - `message`: Una descripción del error.
+    ###
 
   ```javascript
   pos.on('error', error => {
@@ -549,3 +558,42 @@ function CuboPayDemo() {
 
 export default CuboPayDemo;
 ```
+
+## Solución de Problemas (Troubleshooting)
+
+### Error: La conexión falla después de seleccionar el dispositivo
+
+**Síntoma:**
+
+Seleccionas el dispositivo POS en la ventana de Bluetooth del navegador, pero la conexión falla inmediatamente y recibes un error como `bluetooth_connection_error` o "Connection attempt failed". Este problema suele ocurrir en computadoras con Windows específicas, mientras que en otras máquinas funciona sin problemas.
+
+**Causa:**
+
+Este es un problema de entorno común con la API Web Bluetooth y casi nunca es un error en tu código. Generalmente, se debe a un conflicto con los drivers o el hardware de Bluetooth de la computadora, o a una conexión anterior que se quedó "atascada" en el sistema operativo.
+
+**Soluciones (en orden de probabilidad):**
+
+#### 1. Quitar el Dispositivo de la Configuración de Windows (Solución Más Común)
+
+Esta es la solución más frecuente y sencilla.
+
+1.  Ve a **Configuración > Bluetooth y dispositivos** en Windows.
+2.  Busca tu lector de tarjetas en la lista de dispositivos.
+3.  Haz clic en los tres puntos (`...`) y selecciona **"Quitar dispositivo"**.
+4.  Intenta conectar de nuevo desde tu aplicación web. No intentes vincularlo manualmente desde Windows.
+
+#### 2. Reiniciar el Servicio de Bluetooth de Windows
+
+Si lo anterior no funciona, reiniciar el servicio de Bluetooth puede resolver el conflicto.
+
+1.  Presiona las teclas `Win + R`.
+2.  Escribe `services.msc` y presiona Enter.
+3.  Busca en la lista el **"Servicio de compatibilidad con Bluetooth"** (o similar).
+4.  Haz clic derecho sobre él y selecciona **"Reiniciar"**.
+5.  Intenta conectar de nuevo.
+
+#### 3. Probar con un Adaptador Bluetooth Externo (Dongle USB)
+
+Si el problema persiste en una máquina específica, es una señal muy fuerte de que el adaptador de Bluetooth interno o sus drivers son el problema.
+
+- **La solución definitiva:** Usar un adaptador Bluetooth USB económico (conocido como "dongle"). Al conectarlo, Windows usará un conjunto de drivers diferente y limpio para el dongle, evitando el conflicto con el hardware interno. Esta prueba confirma al 100% si el problema es el hardware de la computadora.
