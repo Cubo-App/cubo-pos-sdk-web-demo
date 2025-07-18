@@ -23,7 +23,7 @@ Antes de integrar el SDK, asegúrate de cumplir con los siguientes requisitos, y
 Para comenzar, incluye el script del SDK en tu archivo HTML. Asegúrate de que apunte a la ruta correcta donde has alojado el archivo `cubo-pos-sdk-web.js`.
 
 ```html
-<script src="src/cubo-pos-sdk-web.js"></script>
+<script src="https://d7i6s3judz27s.cloudfront.net/pos/v1.1.1/cubo-pos-sdk-web.js"></script>
 ```
 
 ## 4. Inicialización del SDK
@@ -222,7 +222,7 @@ Aquí tienes un ejemplo básico que puedes usar como punto de partida para tu in
     <pre id="result"></pre>
 
     <!-- Rutas corregidas para apuntar a la carpeta src -->
-    <script src="src/cubo-pos-sdk-web.js"></script>
+    <script src="https://d7i6s3judz27s.cloudfront.net/pos/v1.1.1/cubo-pos-sdk-web.js"></script>
     <script src="src/app.js"></script>
   </body>
 </html>
@@ -319,9 +319,7 @@ Si trabajas con React, puedes integrar el SDK siguiendo estos pasos. Este ejempl
 
 ### Paso 1: Incluir el SDK en `index.html`
 
-Primero, coloca el archivo `cubo-pos-sdk-web.js` en la carpeta `public` de tu proyecto React.
-
-Luego, añade la etiqueta `<script>` a tu archivo `public/index.html` para que el SDK esté disponible globalmente en tu aplicación.
+Añade la etiqueta `<script>` a tu archivo `public/index.html` para que el SDK esté disponible globalmente en tu aplicación.
 
 ```html
 <!-- public/index.html -->
@@ -335,8 +333,8 @@ Luego, añade la etiqueta `<script>` a tu archivo `public/index.html` para que e
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
 
-    <!-- Carga el SDK de Cubo Pago desde la carpeta public -->
-    <script src="/cubo-pos-sdk-web.js"></script>
+    <!-- Carga el SDK de Cubo Pago -->
+    <script src="https://d7i6s3judz27s.cloudfront.net/pos/v1.1.1/cubo-pos-sdk-web.js"></script>
   </body>
 </html>
 ```
