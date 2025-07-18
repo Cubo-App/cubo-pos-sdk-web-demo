@@ -20,7 +20,7 @@ Antes de integrar el SDK, asegúrate de cumplir con los siguientes requisitos, y
 
 ## 3. Instalación
 
-Para comenzar, incluye el script del SDK en tu archivo HTML. Asegúrate de que apunte a la ruta correcta donde has alojado el archivo `cubo-pos-sdk-web.js`.
+Para comenzar, incluye el script del SDK en tu archivo HTML.
 
 ```html
 <script src="https://d7i6s3judz27s.cloudfront.net/pos/v1.1.1/cubo-pos-sdk-web.js"></script>
