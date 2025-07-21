@@ -8,6 +8,7 @@ const resultDiv = document.getElementById('result');
 
 const pos = new CuboPagoSDK({
   apiKey: 'YOUR_API_KEY',
+  environment: 'SANDBOX', // Puede ser SANDBOX o PRODUCTION
 });
 
 // Listeners de eventos del SDK

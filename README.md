@@ -28,13 +28,17 @@ Para comenzar, incluye el script del SDK en tu archivo HTML.
 
 ## 4. Inicialización del SDK
 
-Para usar el SDK, primero debes crear una instancia de `CuboPagoSDK`, proporcionando tu `apiKey`.
+Para usar el SDK, primero debes crear una instancia de `CuboPagoSDK`, proporcionando tu `apiKey` y el `environment`.
 
-> **Nota de Seguridad:** Tu `apiKey` es una credencial sensible. Debes obtenerla desde tu panel de control de Cubo Pago. En un entorno de producción, nunca expongas la `apiKey` directamente en el código del lado del cliente. La forma más segura es que tu backend la provea a la aplicación web después de que el usuario se haya autenticado.
+- `apiKey` (string): Tu clave de API, obtenida desde el panel de [Cubo Admin](https://admin.cubopago.com/developers/api-key).
+- `environment` (string): El entorno de trabajo. Puede ser `'SANDBOX'` para pruebas o `'PRODUCTION'` para transacciones reales.
+
+> **Nota de Seguridad:** Tu `apiKey` es una credencial sensible. En un entorno de producción, nunca la expongas directamente en el código del lado del cliente. La forma más segura es que tu backend la provea a la aplicación web después de que el usuario se haya autenticado.
 
 ```javascript
 const pos = new CuboPagoSDK({
   apiKey: 'TU_API_KEY_AQUI', // ¡Reemplázala con tu clave real!
+  environment: 'SANDBOX', // Puede ser 'SANDBOX' o 'PRODUCTION'
 });
 ```
 
