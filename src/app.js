@@ -6,9 +6,12 @@ const payBtn = document.getElementById('payButton');
 const statusDiv = document.getElementById('status');
 const resultDiv = document.getElementById('result');
 
+const apiKey = 'YOUR_API_KEY';
+const environment = 'SANDBOX'; // Puede ser SANDBOX o PRODUCTION
+
 const pos = new CuboPagoSDK({
-  apiKey: 'YOUR_API_KEY',
-  environment: 'SANDBOX', // Puede ser SANDBOX o PRODUCTION
+  apiKey,
+  environment,
 });
 
 // Listeners de eventos del SDK
