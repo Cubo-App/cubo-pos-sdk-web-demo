@@ -23,7 +23,7 @@ Antes de integrar el SDK, asegúrate de cumplir con los siguientes requisitos, y
 Para comenzar, incluye el script del SDK en tu archivo HTML.
 
 ```html
-<script src="https://sdk.cubopago.com/pos/v1.1.1/cubo-pos-sdk-web.js"></script>
+<script src="https://sdk.cubopago.com/pos/v1.5.4/cubo-pos-sdk-web.js"></script>
 ```
 
 ## 4. Inicialización del SDK
@@ -230,7 +230,7 @@ Aquí tienes un ejemplo básico que puedes usar como punto de partida para tu in
     <pre id="result"></pre>
 
     <!-- Rutas corregidas para apuntar a la carpeta src -->
-    <script src="https://sdk.cubopago.com/pos/v1.1.1/cubo-pos-sdk-web.js"></script>
+    <script src="https://sdk.cubopago.com/pos/v1.5.4/cubo-pos-sdk-web.js"></script>
     <script src="src/app.js"></script>
   </body>
 </html>
@@ -342,7 +342,7 @@ Añade la etiqueta `<script>` a tu archivo `public/index.html` para que el SDK e
     <div id="root"></div>
 
     <!-- Carga el SDK de Cubo Pago -->
-    <script src="https://sdk.cubopago.com/pos/v1.1.1/cubo-pos-sdk-web.js"></script>
+    <script src="https://sdk.cubopago.com/pos/v1.5.4/cubo-pos-sdk-web.js"></script>
   </body>
 </html>
 ```
