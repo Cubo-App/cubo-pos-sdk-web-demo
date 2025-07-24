@@ -67,8 +67,12 @@ Para iniciar una transacción, utiliza el método `startPayment()`. Este método
 **Parámetros de `startPayment`:**
 
 - `amount` (string): El monto a cobrar, expresado en los centavos más pequeños de la moneda (ej., "1250" para $12.50).
-- `currencyCode` (string): El código numérico ISO 4217 de la moneda (ej., "0840" para USD).
-- `currencySymbol` (string): El símbolo de la moneda (ej., "$").
+- `currencyCode` (string): El código numérico ISO 4217 de la moneda:
+  - "0840" para USD.
+  - "0320" para Quetzales.
+- `currencySymbol` (string): El símbolo de la moneda:
+  - "$" para USD.
+  - "Q" para Quetzales.
 
 ```javascript
 const payBtn = document.getElementById('payButton');

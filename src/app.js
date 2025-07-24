@@ -86,11 +86,11 @@ payBtn.addEventListener('click', () => {
   // Define el símbolo de la moneda
   let currencySymbol = '$';
   switch (currencyCode) {
-    case '0978':
-      currencySymbol = '€';
+    case '0320': // Quetzal
+      currencySymbol = 'Q';
       break;
-    case '0484':
-      currencySymbol = 'MXN';
+    case '0840': // Dolar
+      currencySymbol = '$';
       break;
     default:
       currencySymbol = '$';
