@@ -129,6 +129,7 @@ A continuación se detallan los eventos y los datos que emiten:
     - `'processing_payment'`: Procesando la información de la tarjeta.
     - `'payment_success'`: La transacción se completó con éxito.
     - `'payment_failed'`: La transacción falló.
+    - `'transaction_terminated'`: Informa que la transacción fue cancelada antes de completarse (por el usuario, por tiempo de espera, o por un error). No significa "Aprobada" ni "Declinada".
     ###
 
   ```javascript
@@ -229,7 +230,6 @@ Aquí tienes un ejemplo básico que puedes usar como punto de partida para tu in
     <h3>Resultado de la Transacción</h3>
     <pre id="result"></pre>
 
-    <!-- Rutas corregidas para apuntar a la carpeta src -->
     <script src="https://sdk.cubopago.com/pos/v1.6.1/cubo-pos-sdk-web.js"></script>
     <script src="src/app.js"></script>
   </body>
