@@ -95,7 +95,6 @@ El SDK emite eventos para mantener tu aplicación informada sobre el estado del 
 A continuación se detallan los eventos y los datos que emiten:
 
 - **`connected`**: Se dispara cuando la conexión con el lector de tarjetas es exitosa.
-
   - **Datos emitidos**: `(data: { deviceName: string })` - Un objeto que contiene el nombre del dispositivo conectado.
 
   ###
@@ -107,7 +106,6 @@ A continuación se detallan los eventos y los datos que emiten:
   ```
 
 - **`disconnected`**: Se dispara cuando el lector se desconecta, ya sea de forma intencionada o por pérdida de señal.
-
   - **Datos emitidos**: `void` - No se emiten datos con este evento.
 
   ###
@@ -119,17 +117,28 @@ A continuación se detallan los eventos y los datos que emiten:
   ```
 
 - **`status`**: Informa sobre los cambios de estado en el flujo de conexión y pago. Es útil para mostrar mensajes al usuario.
-
   - **Datos emitidos**: `(status: string)` - Una cadena de texto que puede tener los siguientes valores:
+
+    **Estados de Conexión:**
     - `'searching'`: Buscando dispositivos Bluetooth.
     - `'connecting'`: Conectando con el dispositivo seleccionado.
     - `'connected'`: Conexión establecida.
     - `'disconnected'`: Sin conexión.
+
+    **Estados de Verificación y Configuración:**
+    - `'verifying_pos'`: Verificando el dispositivo con el servidor de Cubo Pago.
+    - `'preparing_pos_configuration'`: Se detectó que el POS requiere actualización de configuración EMV.
+    - `'configuring_pos'`: Descargando y aplicando configuración EMV al dispositivo.
+    - `'verification_failed'`: La verificación del dispositivo falló.
+    - `'configuring_failed'`: La configuración EMV falló.
+
+    **Estados de Pago:**
     - `'waiting_for_card'`: Lector listo y esperando que se presente una tarjeta.
     - `'processing_payment'`: Procesando la información de la tarjeta.
     - `'payment_success'`: La transacción se completó con éxito.
     - `'payment_failed'`: La transacción falló.
     - `'transaction_terminated'`: Informa que la transacción fue cancelada antes de completarse (por el usuario, por tiempo de espera, o por un error). No significa "Aprobada" ni "Declinada".
+
     ###
 
   ```javascript
@@ -139,7 +148,6 @@ A continuación se detallan los eventos y los datos que emiten:
   ```
 
 - **`loading`**: Se activa para indicar que el SDK está realizando una operación asíncrona (como procesar un pago) y la UI debería bloquearse.
-
   - **Datos emitidos**: `(isLoading: boolean)` - `true` cuando comienza una operación, `false` cuando termina.
 
   ###
@@ -155,7 +163,6 @@ A continuación se detallan los eventos y los datos que emiten:
   ```
 
 - **`transactionResult`**: Devuelve el resultado final de la transacción después de ser procesada por el servidor de Cubo Pago.
-
   - **Datos emitidos**: `(result: { success: boolean, data?: any, error?: any })` - Un objeto con el resultado.
     - `success`: `true` si el pago fue exitoso, `false` si no lo fue.
     - `data`: Si `success` es `true`, contiene el objeto de respuesta de la API de Cubo Pago.
@@ -173,7 +180,6 @@ A continuación se detallan los eventos y los datos que emiten:
   ```
 
 - **`error`**: Se emite cuando ocurre un error general en el SDK o en el proceso de comunicación.
-
   - **Datos emitidos**: `(error: { type: string, message: string })` - Un objeto que describe el error.
     - `type`: Una cadena que categoriza el error (ej: `'connection_failed'`, `'not_connected'`, `'sdk_error'`).
     - `message`: Una descripción del error.
@@ -230,6 +236,7 @@ Aquí tienes un ejemplo básico que puedes usar como punto de partida para tu in
     <h3>Resultado de la Transacción</h3>
     <pre id="result"></pre>
 
+    <!-- Rutas corregidas para apuntar a la carpeta src -->
     <script src="https://sdk.cubopago.com/pos/v1.9.0/cubo-pos-sdk-web.js"></script>
     <script src="src/app.js"></script>
   </body>
@@ -251,6 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 1. Inicializa el SDK
   const pos = new CuboPagoSDK({
     apiKey: 'TU_API_KEY_AQUI',
+    environment: 'SANDBOX', // 'SANDBOX' para pruebas o 'PRODUCTION' para transacciones reales
   });
 
   // 2. Gestiona la conexión
@@ -294,7 +302,44 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   pos.on('status', newStatus => {
-    statusDiv.textContent = `Estado: ${newStatus}`;
+    // Proporciona mensajes descriptivos para mejor UX
+    switch (newStatus) {
+      case 'searching':
+        statusDiv.textContent = 'Buscando dispositivos...';
+        break;
+      case 'connecting':
+        statusDiv.textContent = 'Conectando...';
+        break;
+      case 'verifying_pos':
+        statusDiv.textContent = 'Verificando dispositivo...';
+        break;
+      case 'preparing_pos_configuration':
+        statusDiv.textContent = 'Preparando configuración...';
+        break;
+      case 'configuring_pos':
+        statusDiv.textContent = 'Configurando dispositivo...';
+        break;
+      case 'waiting_for_card':
+        statusDiv.textContent = 'Esperando tarjeta...';
+        break;
+      case 'processing_payment':
+        statusDiv.textContent = 'Procesando pago...';
+        break;
+      case 'payment_success':
+        statusDiv.textContent = '¡Pago exitoso!';
+        break;
+      case 'payment_failed':
+        statusDiv.textContent = 'Pago fallido';
+        break;
+      case 'verification_failed':
+        statusDiv.textContent = 'Error: Verificación fallida';
+        break;
+      case 'configuring_failed':
+        statusDiv.textContent = 'Error: Configuración fallida';
+        break;
+      default:
+        statusDiv.textContent = `Estado: ${newStatus}`;
+    }
   });
 
   pos.on('loading', isLoading => {
@@ -308,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
       resultDiv.textContent = `Pago exitoso!\n${JSON.stringify(
         result.data,
         null,
-        2
+        2,
       )}`;
     } else {
       resultDiv.textContent = `Error en la transacción: ${result.error.message}`;
@@ -318,6 +363,14 @@ document.addEventListener('DOMContentLoaded', () => {
   pos.on('error', error => {
     resultDiv.textContent = `Error del SDK: ${error.message}`;
   });
+
+  // 5. Cleanup (importante para SPAs)
+  // Si usas este código en una Single Page Application (SPA),
+  // limpia los listeners al cambiar de página para evitar memory leaks:
+  // window.addEventListener('beforeunload', () => {
+  //   pos.removeAllListeners();
+  //   pos.disconnect();
+  // });
 });
 ```
 
@@ -372,9 +425,11 @@ Ahora, crea un componente que encapsule toda la lógica para interactuar con el 
 // src/components/CuboPayDemo.jsx
 import React, { useState, useEffect, useRef } from 'react';
 
-// ¡IMPORTANTE! Guarda tu API Key de forma segura, por ejemplo, en variables de entorno.
-// No la expongas directamente en el código del cliente en un entorno de producción.
-const API_KEY = 'TU_API_KEY_AQUI';
+// ¡IMPORTANTE! Guarda tu API Key de forma segura usando variables de entorno.
+// En Vite: crea un archivo .env con VITE_CUBO_API_KEY=tu_api_key
+// En Create React App: usa REACT_APP_CUBO_API_KEY=tu_api_key
+const API_KEY = import.meta.env.VITE_CUBO_API_KEY || 'TU_API_KEY_AQUI';
+const ENVIRONMENT = import.meta.env.VITE_CUBO_ENVIRONMENT || 'SANDBOX';
 
 function CuboPayDemo() {
   const posSDK = useRef(null);
@@ -391,11 +446,51 @@ function CuboPayDemo() {
     // Comprueba que el SDK se haya cargado en window y que no se haya inicializado ya
     if (window.CuboPagoSDK && !posSDK.current) {
       console.log('Inicializando CuboPagoSDK...');
-      posSDK.current = new window.CuboPagoSDK({ apiKey: API_KEY });
+      posSDK.current = new window.CuboPagoSDK({
+        apiKey: API_KEY,
+        environment: ENVIRONMENT, // 'SANDBOX' o 'PRODUCTION'
+      });
 
       // --- Configuración de Listeners del SDK ---
       posSDK.current.on('status', newStatus => {
-        setStatus(`Estado: ${newStatus}`);
+        // Proporciona mensajes descriptivos para mejor UX
+        switch (newStatus) {
+          case 'searching':
+            setStatus('Buscando dispositivos...');
+            break;
+          case 'connecting':
+            setStatus('Conectando...');
+            break;
+          case 'verifying_pos':
+            setStatus('Verificando dispositivo...');
+            break;
+          case 'preparing_pos_configuration':
+            setStatus('Preparando configuración...');
+            break;
+          case 'configuring_pos':
+            setStatus('Configurando dispositivo...');
+            break;
+          case 'waiting_for_card':
+            setStatus('Esperando tarjeta...');
+            break;
+          case 'processing_payment':
+            setStatus('Procesando pago...');
+            break;
+          case 'payment_success':
+            setStatus('¡Pago exitoso!');
+            break;
+          case 'payment_failed':
+            setStatus('Pago fallido');
+            break;
+          case 'verification_failed':
+            setStatus('Error: Verificación fallida');
+            break;
+          case 'configuring_failed':
+            setStatus('Error: Configuración fallida');
+            break;
+          default:
+            setStatus(`Estado: ${newStatus}`);
+        }
       });
 
       posSDK.current.on('connected', data => {
@@ -415,11 +510,11 @@ function CuboPayDemo() {
       posSDK.current.on('transactionResult', txResult => {
         if (txResult.success) {
           setResult(
-            `¡Pago exitoso!\n${JSON.stringify(txResult.data, null, 2)}`
+            `¡Pago exitoso!\n${JSON.stringify(txResult.data, null, 2)}`,
           );
         } else {
           setResult(
-            `Error en pago: ${txResult.error?.message || 'Error desconocido'}`
+            `Error en pago: ${txResult.error?.message || 'Error desconocido'}`,
           );
         }
       });
@@ -430,12 +525,15 @@ function CuboPayDemo() {
     }
 
     // --- Función de Limpieza ---
-    // Se ejecuta cuando el componente se desmonta para desconectar el lector
-    // y evitar conexiones activas si el usuario navega a otra página.
+    // Se ejecuta cuando el componente se desmonta para desconectar el lector,
+    // limpiar listeners y evitar memory leaks.
     return () => {
-      if (posSDK.current?.isConnected) {
-        console.log('Desconectando lector al salir...');
-        posSDK.current.disconnect();
+      if (posSDK.current) {
+        console.log('Limpiando SDK al desmontar componente...');
+        posSDK.current.removeAllListeners(); // Previene memory leaks
+        if (posSDK.current.isConnected) {
+          posSDK.current.disconnect();
+        }
       }
     };
   }, []); // El array vacío [] asegura que este efecto se ejecute solo una vez (al montar/desmontar)
