@@ -1,0 +1,375 @@
+# CuboPagoSDK — Documentación para LLMs
+
+Este archivo contiene la documentación completa del SDK de Cubo Pago para ser usada por asistentes de IA. Si estás ayudando a un desarrollador a integrar CuboPagoSDK, usa este archivo como referencia.
+
+---
+
+## ¿Qué es CuboPagoSDK?
+
+**CuboPagoSDK** es una clase JavaScript que permite a aplicaciones web procesar pagos con lectores POS físicos vía **Web Bluetooth API**. El SDK maneja la conexión Bluetooth, la comunicación con el lector, el procesamiento del pago con la API de Cubo Pago, y emite eventos para que la aplicación actualice su UI.
+
+**Requisitos:**
+- Chrome 56+ o Edge 79+ (únicos navegadores con Web Bluetooth)
+- HTTPS o `localhost` (contexto seguro obligatorio — `file://` no funciona)
+- Bluetooth habilitado en el dispositivo
+
+---
+
+## Instalación
+
+```html
+<!-- Via CDN (script tag) -->
+<script src="https://sdk.cubopago.com/pos/v1.1.1/cubo-pos-sdk-web.js"></script>
+```
+
+```bash
+# Via npm
+npm install cubo-pos-sdk-web
+```
+
+---
+
+## Inicialización
+
+```javascript
+const pos = new CuboPagoSDK({
+  apiKey: 'TU_API_KEY',        // obligatorio
+  environment: 'SANDBOX',      // obligatorio: 'PRODUCTION' | 'SANDBOX' | 'STG' | 'DEV'
+  enableMsi: true,             // opcional: activa flujo MSI (default: false)
+  msiModal: true,              // opcional: modal MSI automático (default: true)
+  hasPrinter: false,           // opcional: si el merchant tiene impresora física (default: false)
+});
+```
+
+**Throws** si falta `apiKey` o `environment`.
+
+---
+
+## Propiedades públicas
+
+| Propiedad | Tipo | Descripción |
+|-----------|------|-------------|
+| `isConnected` | `boolean` | `true` si hay un dispositivo conectado |
+| `device` | `BluetoothDevice \| null` | Referencia al dispositivo Bluetooth activo |
+
+---
+
+## Métodos públicos
+
+### `connect(): Promise<string>`
+Abre el selector de dispositivos Bluetooth y conecta al POS.
+- **Requiere gesto del usuario** (debe llamarse desde un click)
+- Emite: `status('searching')` → `status('connecting')` → `connected` o `error`
+
+```javascript
+connectBtn.addEventListener('click', () => {
+  if (pos.isConnected) {
+    pos.disconnect();
+  } else {
+    pos.connect().catch(err => console.error(err.message));
+  }
+});
+```
+
+### `disconnect(): void`
+Desconecta el dispositivo. Emite: `disconnected`.
+
+### `startPayment(params): Promise<void>`
+Inicia una transacción de pago.
+
+```typescript
+pos.startPayment({
+  amount: string;                  // En centavos: $12.50 → "1250"
+  currencyCode: string;            // ISO 4217: "0840"=USD, "0320"=GTQ, "0484"=MXN
+  currencySymbol: string;          // "$", "Q", "MXN$", etc.
+  monthlyInstallmentId?: string;   // Solo para MSI con msiModal: false
+})
+```
+
+**Validaciones** (lanza error síncrono si falla):
+- Dispositivo conectado
+- `amount` no vacío, número válido, mayor a 0
+- `currencyCode` exactamente 4 dígitos
+- `currencySymbol` no vacío
+
+El resultado llega **asíncronamente** por el evento `transactionResult`.
+
+### `cancelCurrentTransaction(): boolean`
+Cancela la petición HTTP en curso. Retorna `true` si había transacción activa.
+
+### `getDeviceInfo(): Promise<ITerminalDeviceInfo>`
+Retorna información del hardware (modelo, firmware, serial).
+
+### `getPosId(): Promise<IDeviceIdInfo>`
+Retorna identificadores únicos del POS.
+
+### `on(event, callback): void`
+Registra un listener de eventos.
+
+### `off(event, callback?): void`
+Remueve un listener específico o todos los de un evento.
+
+### `removeAllListeners(): void`
+Remueve todos los listeners. Llamar al destruir el componente para evitar memory leaks.
+
+---
+
+## Sistema de eventos
+
+### `status` — actualizaciones del flujo
+
+```javascript
+pos.on('status', status => {
+  // Valores posibles:
+  // Conexión:      'searching' | 'connecting' | 'connected'
+  // Verificación:  'verifying_pos' | 'verification_failed'
+  // Configuración: 'preparing_pos_configuration' | 'configuring_pos' | 'configuring_failed'
+  // Pago:          'waiting_for_card' | 'processing' | 'payment_success' | 'payment_failed' | 'payment_pending'
+  // Recovery:      strings en español ("Estamos confirmando tu pago con el banco...", etc.)
+});
+```
+
+### `connected`
+```javascript
+pos.on('connected', ({ deviceName }) => {
+  console.log('Conectado a:', deviceName);
+  // A partir de aquí ya puedes llamar startPayment()
+});
+```
+
+### `disconnected`
+```javascript
+pos.on('disconnected', () => {
+  // Resetear UI, deshabilitar botón de pago
+});
+```
+
+### `transactionResult` — resultado final del pago
+```javascript
+pos.on('transactionResult', result => {
+  if (result.success) {
+    // Pago aprobado
+    // result.data = respuesta completa de la API
+  } else if (result.pending) {
+    // Estado incierto — el SDK no pudo confirmar si se procesó
+    // ⚠️ NO reintentar automáticamente — podrías cobrar dos veces
+    // Mostrar result.message al usuario y consultar historial en el backend
+    showMessage(result.message);
+  } else {
+    // Pago rechazado o error
+    // result.error = { type: string, message: string }
+    showError(result.error.message);
+  }
+});
+```
+
+### `error`
+```javascript
+pos.on('error', ({ type, message }) => {
+  // Tipos posibles:
+  // 'not_connected'         — startPayment() sin estar conectado
+  // 'connection_failed'     — falló la conexión Bluetooth
+  // 'invalid_amount'        — monto inválido o <= 0
+  // 'invalid_currency_code' — currencyCode no tiene 4 dígitos
+  // 'invalid_currency_symbol' — currencySymbol vacío
+  // 'transaction_declined'  — banco rechazó la transacción
+  // 'transaction_not_found' — no se encontró en recovery
+  // 'recovery_in_progress'  — nuevo pago iniciado durante recovery activo
+  // 'sdk_error'             — error interno
+});
+```
+
+### `loading`
+```javascript
+pos.on('loading', isLoading => {
+  spinner.style.display = isLoading ? 'block' : 'none';
+  payBtn.disabled = isLoading;
+});
+```
+
+### `installmentsLoaded` (solo con `enableMsi: true` y `msiModal: false`)
+```javascript
+pos.on('installmentsLoaded', installments => {
+  // installments = [{ id, numberOfPayments, minimumAmount, description }]
+});
+```
+
+---
+
+## Flujo básico completo
+
+```javascript
+const pos = new CuboPagoSDK({ apiKey: 'TU_KEY', environment: 'SANDBOX' });
+
+// Registrar eventos
+pos.on('connected', ({ deviceName }) => {
+  statusEl.textContent = `Conectado a: ${deviceName}`;
+  payBtn.disabled = false;
+});
+
+pos.on('disconnected', () => {
+  statusEl.textContent = 'Desconectado';
+  payBtn.disabled = true;
+});
+
+pos.on('loading', isLoading => {
+  payBtn.disabled = isLoading;
+});
+
+pos.on('transactionResult', result => {
+  if (result.success) {
+    alert('¡Pago aprobado!');
+  } else if (result.pending) {
+    alert(result.message);
+  } else {
+    alert(`Error: ${result.error.message}`);
+  }
+});
+
+pos.on('error', ({ message }) => {
+  statusEl.textContent = `Error: ${message}`;
+});
+
+// Botón conectar
+connectBtn.addEventListener('click', () => {
+  pos.isConnected ? pos.disconnect() : pos.connect().catch(console.error);
+});
+
+// Botón pagar
+payBtn.addEventListener('click', () => {
+  const amountInCents = Math.round(parseFloat(amountInput.value) * 100).toString();
+  pos.startPayment({
+    amount: amountInCents,
+    currencyCode: '0840',
+    currencySymbol: '$',
+  }).catch(console.error);
+});
+```
+
+---
+
+## MSI (Meses Sin Intereses)
+
+### Modal automático (recomendado)
+```javascript
+const pos = new CuboPagoSDK({
+  apiKey: '...',
+  environment: 'SANDBOX',
+  enableMsi: true,
+  // msiModal: true (default)
+});
+// El modal aparece automáticamente al llamar startPayment()
+```
+
+### Con UI propia
+```javascript
+const pos = new CuboPagoSDK({
+  apiKey: '...',
+  environment: 'SANDBOX',
+  enableMsi: true,
+  msiModal: false,
+});
+
+pos.on('installmentsLoaded', installments => {
+  // Poblar tu propia UI
+  // installments[i] = { id, numberOfPayments, minimumAmount, description }
+});
+
+// Al confirmar el plan:
+pos.startPayment({
+  amount: amountInCents,
+  currencyCode: '0840',
+  currencySymbol: '$',
+  monthlyInstallmentId: selectedPlan.id,
+});
+```
+
+---
+
+## Integración con React
+
+```typescript
+import { useEffect, useRef } from 'react';
+
+function PaymentComponent() {
+  const posRef = useRef<any>(null);
+
+  useEffect(() => {
+    posRef.current = new window.CuboPagoSDK({
+      apiKey: process.env.REACT_APP_CUBO_API_KEY,
+      environment: 'SANDBOX',
+    });
+
+    const pos = posRef.current;
+
+    pos.on('transactionResult', (result: any) => {
+      if (result.success) { /* aprobado */ }
+      else if (result.pending) { /* incierto */ }
+      else { /* rechazado */ }
+    });
+
+    pos.on('error', (error: any) => console.error(error));
+    pos.on('disconnected', () => { /* resetear UI */ });
+
+    return () => {
+      pos.removeAllListeners();
+      if (pos.isConnected) pos.disconnect();
+    };
+  }, []);
+
+  const handleConnect = () => {
+    const pos = posRef.current;
+    pos?.isConnected ? pos.disconnect() : pos?.connect().catch(console.error);
+  };
+
+  return <button onClick={handleConnect}>Conectar</button>;
+}
+```
+
+---
+
+## TypeScript
+
+```typescript
+// global.d.ts
+declare global {
+  interface Window {
+    CuboPagoSDK: typeof import('cubo-pos-sdk-web').CuboPagoSDK;
+  }
+}
+
+const pos: import('cubo-pos-sdk-web').CuboPagoSDK = new window.CuboPagoSDK({ ... });
+```
+
+---
+
+## Cancelar y limpiar
+
+```javascript
+// Cancelar transacción en curso
+cancelBtn.addEventListener('click', () => {
+  const cancelled = pos.cancelCurrentTransaction();
+  if (cancelled) console.log('Transacción cancelada');
+});
+
+// Limpiar al cerrar la app
+window.addEventListener('beforeunload', () => {
+  pos.removeAllListeners();
+  pos.disconnect();
+});
+```
+
+---
+
+## Errores comunes y soluciones
+
+| Problema | Causa | Solución |
+|---------|-------|----------|
+| Botón conectar no abre selector Bluetooth | No estás en HTTPS ni localhost | Servir con `npx serve . -l 3000` y abrir `http://localhost:3000` |
+| Botón conectar no responde en absoluto | El constructor falló — los listeners nunca se registraron | Verificar consola del navegador por errores de inicialización |
+| `transactionResult` nunca llega | Listener registrado después de `startPayment()` | Registrar listeners antes de cualquier acción |
+| Eventos duplicados | Múltiples llamadas a `pos.on()` | Llamar `removeAllListeners()` al desmontar componente |
+| `pending: true` en resultado | Error de red durante el pago | No reintentar — consultar historial en backend primero |
+| Modal MSI no aparece | `enableMsi` no está en `true` | Pasar `enableMsi: true` en el constructor |
+| Error `recovery_in_progress` | Nuevo pago iniciado durante recovery | Deshabilitar botón de pago hasta recibir `transactionResult` |
+| Navegador incompatible | Firefox o Safari | Solo funciona en Chrome 56+ / Edge 79+ |
