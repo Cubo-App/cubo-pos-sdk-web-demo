@@ -663,6 +663,32 @@ function CuboPayDemo() {
 export default CuboPayDemo;
 ```
 
+## 8. Integración con Asistentes de IA
+
+¿Usas un asistente de IA para programar? Este repo incluye archivos que le dan contexto sobre el SDK para que te ayude mejor — ya sea respondiendo preguntas, generando código de integración o explicando eventos y errores.
+
+### Claude Code
+
+Si usas [Claude Code](https://claude.ai/code), copia el skill incluido a tu proyecto:
+
+```bash
+cp -r .claude/skills/cubo-sdk-help [TU-PROYECTO]/.claude/skills/
+```
+
+Luego, desde cualquier conversación en tu proyecto, escribe `/cubo-sdk-help` y Claude tendrá contexto completo del SDK para ayudarte.
+
+### Cursor, Copilot y otros LLMs
+
+Copia el archivo `llms.txt` a la raíz de tu proyecto:
+
+```bash
+cp llms.txt [TU-PROYECTO]/llms.txt
+```
+
+Este archivo contiene la documentación del SDK en un formato optimizado para LLMs. Tu asistente lo usará como referencia cuando trabajes con el SDK.
+
+---
+
 ## Solución de Problemas (Troubleshooting)
 
 ### Error: La conexión falla después de seleccionar el dispositivo
