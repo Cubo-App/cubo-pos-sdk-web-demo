@@ -16,7 +16,7 @@ const loadingIndicator = document.getElementById('loadingIndicator');
 // 2. CONFIGURACIÓN DEL SDK
 // ⚠️ En producción, NUNCA expongas tu API Key en el frontend
 const apiKey = 'TU_API_KEY_AQUI'; // ⚠️ En producción, nunca expongas tu API Key en el frontend
-const environment = 'SANDBOX'; // 'DEV', 'STG', 'SANDBOX' o 'PRODUCTION'
+const environment = 'SANDBOX'; // 'SANDBOX' o 'PRODUCTION'
 
 // Advertencia visible si el SDK no está bien configurado
 const missingApiKey = !apiKey || apiKey === 'TU_API_KEY_AQUI';
@@ -158,39 +158,6 @@ payBtn.addEventListener('click', () => {
 // 5. EJEMPLOS AVANZADOS (COMENTADOS)
 // =================================================================
 // Descomenta estos ejemplos según tus necesidades
-
-// --- MANEJAR ESTADOS DE VERIFICACIÓN Y CONFIGURACIÓN DEL POS ---
-// Durante la conexión, el SDK verifica el dispositivo y puede requerir configuración EMV
-/*
-pos.on('status', (status) => {
-  switch(status) {
-    case 'verifying_pos':
-      console.log('Verificando dispositivo con el servidor...');
-      statusDiv.textContent = 'Verificando dispositivo...';
-      break;
-    case 'preparing_pos_configuration':
-      console.log('Se detectó actualización de configuración EMV requerida');
-      statusDiv.textContent = 'Preparando configuración del dispositivo...';
-      break;
-    case 'configuring_pos':
-      console.log('Descargando y aplicando configuración EMV...');
-      statusDiv.textContent = 'Configurando dispositivo...';
-      break;
-    case 'verification_failed':
-      console.error('Falló la verificación del dispositivo');
-      statusDiv.textContent = 'Error: Verificación fallida';
-      break;
-    case 'configuring_failed':
-      console.error('Falló la configuración EMV');
-      statusDiv.textContent = 'Error: Configuración fallida';
-      break;
-    case 'connected':
-      console.log('Dispositivo listo para procesar pagos');
-      statusDiv.textContent = 'Conectado y listo';
-      break;
-  }
-});
-*/
 
 // --- CANCELAR TRANSACCIÓN EN CURSO ---
 // Útil para implementar un botón de "Cancelar" o timeout personalizado
